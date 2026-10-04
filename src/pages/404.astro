@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/url.ts';
+---
+
+<Base title="Pagina niet gevonden" path="/404/" noindex>
+  <h1 class="text-3xl font-bold">Deze pagina bestaat niet</h1>
+  <p class="mt-2 text-slate-600">Misschien is de bestemming verhuisd. Begin opnieuw op de <a href={withBase('/')} class="underline">homepage</a> of bekijk <a href={withBase('/bestemmingen/')} class="underline">alle bestemmingen</a>.</p>
+</Base>

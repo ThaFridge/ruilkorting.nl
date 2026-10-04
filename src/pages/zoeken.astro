@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import SearchForm from '../components/SearchForm.astro';
+import { withBase } from '../lib/url.ts';
+
+// Static page; the island reads the query string and renders results client-side
+// from /data/index/*.json and one /data/reachability/<station>.json (ARCHITECTURE.md).
+const destinations = (await getCollection('destinations', (d) => d.data.published)).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title, 'nl'),
+);
+---
+
+<Base title="Zoekresultaten" path="/zoeken/" noindex>
+  <h1 class="text-2xl font-bold">Treinuitjes zoeken</h1>
+  <details class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4" id="zoekformulier">
+    <summary class="cursor-pointer font-medium">Zoekopdracht aanpassen</summary>
+    <div class="mt-3"><SearchForm compact /></div>
+  </details>
+
+  <div id="resultaten" class="mt-6" data-base={import.meta.env.BASE_URL} aria-live="polite">
+    <noscript>
+      <p class="rounded-lg bg-amber-50 p-3 text-amber-900">Voor zoeken op reistijd en budget is JavaScript nodig. Hieronder staan alle bestemmingen.</p>
+      <ul class="mt-3 list-disc pl-5">
+        {destinations.map((d) => <li><a class="underline" href={withBase(`/bestemmingen/${d.id}/`)}>{d.data.title}</a></li>)}
+      </ul>
+    </noscript>
+    <p class="js-only text-slate-600">Resultaten laden…</p>
+  </div>
+
+  <script>
+    import { mountSearchResults } from '../islands/search-results.ts';
+    mountSearchResults(document.getElementById('resultaten')!);
+  </script>
+</Base>

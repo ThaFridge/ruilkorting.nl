@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import { BUDGET_OPTIONS, MAX_TRAVEL_OPTIONS, SORT_MODES } from '../lib/site.ts';
+import { nextSaturday } from '../lib/season.ts';
+import { withBase } from '../lib/url.ts';
+
+interface Props {
+  compact?: boolean;
+  /** Preselected values (e.g. from the results page). */
+  values?: Partial<Record<'van' | 'datum' | 'budget' | 'categorie' | 'maxreistijd' | 'sorteer', string>>;
+}
+const { compact = false, values = {} } = Astro.props;
+
+const stations = (await getCollection('stations')).sort(
+  (a, b) => Number(b.data.major) - Number(a.data.major) || a.data.name.localeCompare(b.data.name, 'nl'),
+);
+const categories = (await getCollection('categories')).sort((a, b) => a.data.order - b.data.order);
+const defaultDate = values.datum ?? nextSaturday(new Date());
+---
+
+<form action={withBase('/zoeken/')} method="get" class:list={['grid gap-3', compact ? 'sm:grid-cols-6' : 'sm:grid-cols-2 lg:grid-cols-6']} aria-label="Zoek treinuitjes">
+  <div class="sm:col-span-2">
+    <label for="van" class="label">Vertrekstation</label>
+    <select id="van" name="van" class="field" required>
+      <option value="" disabled selected={!values.van}>Kies een station</option>
+      {stations.map((s) => <option value={s.id} selected={values.van === s.id}>{s.data.name}</option>)}
+    </select>
+  </div>
+  <div>
+    <label for="datum" class="label">Datum</label>
+    <input id="datum" name="datum" type="date" class="field" value={defaultDate} />
+  </div>
+  <div>
+    <label for="budget" class="label">Budget p.p.</label>
+    <select id="budget" name="budget" class="field">
+      <option value="" selected={!values.budget}>Geen limiet</option>
+      {BUDGET_OPTIONS.map((b) => <option value={String(b)} selected={values.budget === String(b)}>tot € {b}</option>)}
+    </select>
+  </div>
+  <div>
+    <label for="categorie" class="label">Wat wil je doen?</label>
+    <select id="categorie" name="categorie" class="field">
+      <option value="" selected={!values.categorie}>Alles</option>
+      {categories.map((c) => <option value={c.id} selected={values.categorie === c.id}>{c.data.name}</option>)}
+    </select>
+  </div>
+  <div>
+    <label for="maxreistijd" class="label">Max. reistijd</label>
+    <select id="maxreistijd" name="maxreistijd" class="field">
+      <option value="" selected={!values.maxreistijd}>Geen limiet</option>
+      {MAX_TRAVEL_OPTIONS.map((m) => <option value={String(m)} selected={values.maxreistijd === String(m)}>tot {m / 60 >= 1 ? `${Math.floor(m / 60)}u${m % 60 ? m % 60 : ''}` : `${m} min`}</option>)}
+    </select>
+  </div>
+  {values.sorteer && SORT_MODES.includes(values.sorteer as (typeof SORT_MODES)[number]) && <input type="hidden" name="sorteer" value={values.sorteer} />}
+  <div class="flex items-end sm:col-span-2 lg:col-span-6">
+    <button type="submit" class="btn-primary w-full lg:w-auto">Zoek uitjes</button>
+  </div>
+</form>

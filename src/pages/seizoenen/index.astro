@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { withBase } from '../../lib/url.ts';
+const seasons = (await getCollection('seasons')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Seizoenen" description="Seizoensgebonden treinuitjes: voorjaar, zomer, herfst, winter, kerst, carnaval en schoolvakanties." path="/seizoenen/">
+  <h1 class="text-3xl font-bold">Seizoenen</h1>
+  <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+    {seasons.map((s) => (
+      <li><a href={withBase(`/seizoenen/${s.id}/`)} class="card block h-full"><span class="block font-semibold">{s.data.name}</span><span class="block text-sm text-slate-600">{s.data.description}</span></a></li>
+    ))}
+  </ul>
+</Base>

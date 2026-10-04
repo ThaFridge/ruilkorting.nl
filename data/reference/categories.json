@@ -1,0 +1,13 @@
+[
+  { "id": "treindeals", "name": "Treindeals", "description": "Acties en voordelige treinkaartjes voor een dagje uit.", "icon": "🎫", "order": 10 },
+  { "id": "steden", "name": "Steden", "description": "Stedentrips binnen Nederland, direct vanaf het station.", "icon": "🏛️", "order": 20 },
+  { "id": "pretparken", "name": "Pretparken", "description": "Attractieparken die goed met trein en bus bereikbaar zijn.", "icon": "🎢", "order": 30 },
+  { "id": "wellness", "name": "Wellness", "description": "Sauna's en thermen voor een dag ontspannen.", "icon": "🧖", "order": 40 },
+  { "id": "natuur", "name": "Natuur", "description": "Nationale parken, duinen en wandelgebieden met OV-aansluiting.", "icon": "🌳", "order": 50 },
+  { "id": "strand", "name": "Strand", "description": "Kustplaatsen met een station op loopafstand van het strand.", "icon": "🏖️", "order": 60 },
+  { "id": "musea", "name": "Musea", "description": "Musea en tentoonstellingen in heel Nederland.", "icon": "🖼️", "order": 70 },
+  { "id": "festivals", "name": "Festivals", "description": "Muziek- en cultuurfestivals met pendel of station dichtbij.", "icon": "🎪", "order": 80 },
+  { "id": "evenementen", "name": "Evenementen", "description": "Markten, parades en eendaagse evenementen.", "icon": "📅", "order": 90 },
+  { "id": "kerstmarkten", "name": "Kerstmarkten", "description": "Kerstmarkten en winterse uitjes in december.", "icon": "🎄", "order": 100 },
+  { "id": "weekendjes-weg", "name": "Weekendjes weg", "description": "Bestemmingen met hotels, geschikt voor een overnachting.", "icon": "🧳", "order": 110 }
+]

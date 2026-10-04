@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { withBase } from '../../lib/url.ts';
+const categories = (await getCollection('categories')).sort((a, b) => a.data.order - b.data.order);
+const destinations = await getCollection('destinations', (d) => d.data.published);
+const count = (id: string) => destinations.filter((d) => d.data.categories.some((c) => c.id === id)).length;
+---
+
+<Base title="Categorieën" description="Treinuitjes per categorie: steden, pretparken, wellness, natuur, strand, musea en meer." path="/categorieen/">
+  <h1 class="text-3xl font-bold">Categorieën</h1>
+  <ul class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {categories.map((c) => (
+      <li>
+        <a href={withBase(`/categorieen/${c.id}/`)} class="card flex h-full gap-3">
+          <span aria-hidden="true" class="text-3xl">{c.data.icon}</span>
+          <span><span class="block font-semibold">{c.data.name}</span><span class="block text-sm text-slate-600">{c.data.description}</span><span class="mt-1 block text-xs text-slate-500">{count(c.id)} bestemmingen</span></span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</Base>

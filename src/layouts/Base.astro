@@ -1,0 +1,82 @@
+---
+import '../styles/global.css';
+import { INDEXABLE, SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from '../lib/site.ts';
+import { withBase } from '../lib/url.ts';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Path without base, e.g. "/bestemmingen/valkenburg/". */
+  path: string;
+  noindex?: boolean;
+}
+
+const { title, description = SITE_DESCRIPTION, path, noindex = false } = Astro.props;
+const canonical = new URL(withBase(path), Astro.site).toString();
+const fullTitle = path === '/' ? `${SITE_NAME} — ${SITE_TAGLINE}` : `${title} · ${SITE_NAME}`;
+const robots = INDEXABLE && !noindex ? 'index,follow' : 'noindex,nofollow';
+const nav = [
+  { href: '/bestemmingen/', label: 'Bestemmingen' },
+  { href: '/categorieen/', label: 'Categorieën' },
+  { href: '/seizoenen/', label: 'Seizoenen' },
+  { href: '/treinuitjes/vanuit/', label: 'Vanuit jouw station' },
+];
+---
+
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="nl_NL" />
+    <meta name="generator" content={Astro.generator} />
+    <slot name="head" />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <a href="#inhoud" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2">Naar inhoud</a>
+    <header class="border-b border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
+        <a href={withBase('/')} class="flex items-center gap-2 text-lg font-bold text-rail-700" aria-label={`${SITE_NAME} home`}>
+          <span aria-hidden="true" class="inline-flex size-8 items-center justify-center rounded-md bg-rail-600 text-white">🚆</span>
+          <span>Railkorting<span class="text-signal-500">.nl</span></span>
+        </a>
+        <nav aria-label="Hoofdnavigatie" class="hidden gap-5 text-sm font-medium text-slate-700 sm:flex">
+          {nav.map((item) => <a href={withBase(item.href)} class="hover:text-rail-700">{item.label}</a>)}
+        </nav>
+      </div>
+      <nav aria-label="Hoofdnavigatie mobiel" class="flex gap-4 overflow-x-auto px-4 pb-3 text-sm font-medium text-slate-700 sm:hidden">
+        {nav.map((item) => <a href={withBase(item.href)} class="shrink-0 hover:text-rail-700">{item.label}</a>)}
+      </nav>
+    </header>
+
+    <main id="inhoud" class="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+      <slot />
+    </main>
+
+    <footer class="mt-12 border-t border-slate-200 bg-slate-50">
+      <div class="mx-auto max-w-5xl space-y-3 px-4 py-8 text-sm text-slate-600">
+        <p><strong class="text-slate-800">{SITE_NAME}</strong> — {SITE_TAGLINE}. Prototype; alle gegevens worden bij het bouwen van de site berekend en zijn niet live.</p>
+        <p>
+          Reistijden zijn indicatieve schattingen tot de dienstregelingsdata is gekoppeld. Plan je werkelijke reis altijd met een actuele reisplanner.
+          <a href={withBase('/over/')} class="underline hover:text-rail-700">Over deze site</a>
+        </p>
+        {!INDEXABLE && <p class="text-xs text-slate-500">Preview-omgeving (niet geïndexeerd).</p>}
+      </div>
+    </footer>
+  </body>
+</html>

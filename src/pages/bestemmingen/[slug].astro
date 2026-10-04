@@ -1,0 +1,121 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DestinationCard from '../../components/DestinationCard.astro';
+import { distanceBand, haversineKm } from '../../lib/geo.ts';
+import { priceLabel } from '../../lib/format.ts';
+import { PLANNER_URL, withBase } from '../../lib/url.ts';
+
+export async function getStaticPaths() {
+  const destinations = await getCollection('destinations', (d) => d.data.published);
+  return destinations.map((d) => ({ params: { slug: d.id }, props: { destination: d } }));
+}
+
+const { destination } = Astro.props;
+const d = destination.data;
+const { Content } = await render(destination);
+
+const [city, station, all, cities, stations, categories, seasons] = await Promise.all([
+  getEntry(d.city),
+  getEntry(d.nearest_station),
+  getCollection('destinations', (x) => x.data.published && x.id !== destination.id),
+  getCollection('cities'),
+  getCollection('stations'),
+  getCollection('categories'),
+  getCollection('seasons'),
+]);
+const cityName = new Map(cities.map((c) => [c.id, c.data.title]));
+const stationName = new Map(stations.map((s) => [s.id, s.data.name]));
+const categoryName = new Map(categories.map((c) => [c.id, c.data.name]));
+const seasonName = new Map(seasons.map((s) => [s.id, s.data.name]));
+
+// Discovery funnel (PRODUCT_SPEC §6): nearby destinations by distance band.
+const nearby = all
+  .map((x) => ({ x, km: haversineKm(d.location, x.data.location) }))
+  .filter((n) => n.km < 25)
+  .sort((a, b) => a.km - b.km)
+  .slice(0, 4);
+const price = priceLabel(d.price);
+const modeLabel: Record<typeof d.last_mile.mode, string> = { walk: 'lopen', bus: 'met de bus', tram: 'met de tram', metro: 'met de metro', ferry: 'met de veerboot', train: 'met de trein' };
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': d.type === 'evenement' || d.type === 'festival' ? 'Event' : 'TouristAttraction',
+  name: d.title,
+  description: d.summary,
+  url: new URL(withBase(`/bestemmingen/${destination.id}/`), Astro.site).toString(),
+  geo: { '@type': 'GeoCoordinates', latitude: d.location.lat, longitude: d.location.lon },
+  address: { '@type': 'PostalAddress', addressLocality: city!.data.title, addressRegion: city!.data.province, addressCountry: 'NL' },
+  ...(d.website ? { sameAs: d.website } : {}),
+};
+---
+
+<Base title={d.title} description={d.summary} path={`/bestemmingen/${destination.id}/`}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
+  <nav aria-label="Kruimelpad" class="text-sm text-slate-500">
+    <a href={withBase('/')} class="hover:underline">Home</a> › <a href={withBase('/bestemmingen/')} class="hover:underline">Bestemmingen</a> › <span aria-current="page">{d.title}</span>
+  </nav>
+
+  <article class="mt-4">
+    <header>
+      <p class="text-sm font-medium uppercase tracking-wide text-rail-700">{d.type} · <a href={withBase(`/steden/${city!.id}/`)} class="underline">{city!.data.title}</a>, {city!.data.province}</p>
+      <h1 class="mt-1 text-3xl font-bold">{d.title}</h1>
+      <p class="mt-2 text-lg text-slate-700">{d.summary}</p>
+    </header>
+
+    <section class="mt-6 grid gap-4 sm:grid-cols-2" aria-label="Reisinformatie">
+      <div class="card">
+        <h2 class="font-semibold">Zo kom je er met het OV</h2>
+        <p class="mt-2 text-sm">Reis naar station <strong>{station!.data.name}</strong>, daarna ca. {d.last_mile.minutes} min {modeLabel[d.last_mile.mode]}.</p>
+        {d.last_mile.note && <p class="mt-1 text-sm text-slate-600">{d.last_mile.note}</p>}
+        <p class="mt-3 flex flex-wrap gap-2">
+          <a href={withBase(`/treinuitjes/vanuit/`)} class="chip">Reistijd vanaf jouw station</a>
+          <a href={PLANNER_URL} target="_blank" rel="noopener" class="chip">Plan de reis (NS) ↗</a>
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="font-semibold">Prijs</h2>
+        <p class="mt-2 text-sm"><strong>{price.text}</strong>{price.detail && <span class="text-slate-600"> · {price.detail}</span>}</p>
+        {d.website && <p class="mt-3"><a href={d.website} target="_blank" rel="noopener" class="chip">Officiële website ↗</a></p>}
+      </div>
+    </section>
+
+    {d.highlights.length > 0 && (
+      <section class="mt-6">
+        <h2 class="text-xl font-semibold">Niet missen</h2>
+        <ul class="mt-2 list-disc space-y-1 pl-5 text-slate-800">{d.highlights.map((h) => <li>{h}</li>)}</ul>
+      </section>
+    )}
+
+    <section class="prose prose-slate mt-6 max-w-none text-slate-800 [&_p]:mt-3">
+      <Content />
+    </section>
+
+    <section class="mt-6 flex flex-wrap gap-2" aria-label="Categorieën en seizoenen">
+      {d.categories.map((c) => <a href={withBase(`/categorieen/${c.id}/`)} class="chip hover:bg-slate-200">{categoryName.get(c.id) ?? c.id}</a>)}
+      {d.seasons.map((s) => <a href={withBase(`/seizoenen/${s.id}/`)} class="chip bg-emerald-50 text-emerald-800 hover:bg-emerald-100">{seasonName.get(s.id) ?? s.id}</a>)}
+    </section>
+  </article>
+
+  {nearby.length > 0 && (
+    <section class="mt-10" aria-labelledby="dichtbij">
+      <h2 id="dichtbij" class="text-2xl font-bold">In de buurt</h2>
+      <div class="mt-3 grid gap-4 sm:grid-cols-2">
+        {nearby.map(({ x, km }) => (
+          <div>
+            <p class="mb-1 text-xs text-slate-500">{distanceBand(km)} hemelsbreed</p>
+            <DestinationCard
+              destination={x}
+              cityName={cityName.get(x.data.city.id) ?? x.data.city.id}
+              stationName={stationName.get(x.data.nearest_station.id) ?? x.data.nearest_station.id}
+              categoryNames={x.data.categories.map((c) => categoryName.get(c.id) ?? c.id)}
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+</Base>

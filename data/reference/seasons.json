@@ -1,0 +1,10 @@
+[
+  { "id": "voorjaar", "name": "Voorjaar", "description": "Bloesem, bollenvelden en de eerste terrasdagen.", "kind": "season", "months": [3, 4, 5], "order": 10 },
+  { "id": "zomer", "name": "Zomer", "description": "Strand, festivals en lange dagen buiten.", "kind": "season", "months": [6, 7, 8], "order": 20 },
+  { "id": "herfst", "name": "Herfst", "description": "Bosrijke wandelingen, musea en wellness.", "kind": "season", "months": [9, 10, 11], "order": 30 },
+  { "id": "winter", "name": "Winter", "description": "Warme uitjes, musea en sauna's.", "kind": "season", "months": [12, 1, 2], "order": 40 },
+  { "id": "kerst", "name": "Kerst", "description": "Kerstmarkten en lichtjesroutes in december.", "kind": "event-period", "months": [12], "order": 50 },
+  { "id": "carnaval", "name": "Carnaval", "description": "Carnaval in het zuiden, meestal in februari of begin maart.", "kind": "event-period", "months": [2, 3], "order": 60 },
+  { "id": "schoolvakanties", "name": "Schoolvakanties", "description": "Uitjes voor gezinnen tijdens de schoolvakanties.", "kind": "holiday", "months": [2, 4, 5, 7, 8, 10, 12], "order": 70 },
+  { "id": "feestdagen", "name": "Feestdagen", "description": "Dagjes uit rond Pasen, Koningsdag, Hemelvaart en Pinksteren.", "kind": "holiday", "months": [4, 5, 12], "order": 80 }
+]

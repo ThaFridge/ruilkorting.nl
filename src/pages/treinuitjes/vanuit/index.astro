@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { withBase } from '../../../lib/url.ts';
+const stations = (await getCollection('stations')).sort((a, b) => Number(b.data.major) - Number(a.data.major) || a.data.name.localeCompare(b.data.name, 'nl'));
+const byProvince = Object.groupBy(stations, (s) => s.data.province);
+---
+
+<Base title="Treinuitjes vanuit jouw station" description="Kies je vertrekstation en zie welke uitjes binnen bereik liggen, gesorteerd op reistijd." path="/treinuitjes/vanuit/">
+  <h1 class="text-3xl font-bold">Vanuit welk station vertrek je?</h1>
+  <p class="mt-2 text-slate-600">Per station tonen we alle bestemmingen op volgorde van reistijd.</p>
+  {Object.entries(byProvince).sort(([a], [b]) => a.localeCompare(b, 'nl')).map(([province, list]) => (
+    <section class="mt-6">
+      <h2 class="text-lg font-semibold">{province}</h2>
+      <ul class="mt-2 flex flex-wrap gap-2">
+        {list!.map((s) => <li><a href={withBase(`/treinuitjes/vanuit/${s.id}/`)} class="chip min-h-10 px-3 text-sm hover:bg-slate-200">{s.data.name}</a></li>)}
+      </ul>
+    </section>
+  ))}
+</Base>

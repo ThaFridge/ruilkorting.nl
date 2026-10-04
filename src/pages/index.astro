@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import SearchForm from '../components/SearchForm.astro';
+import DestinationCard from '../components/DestinationCard.astro';
+import { seasonsForDate } from '../lib/season.ts';
+import { withBase } from '../lib/url.ts';
+
+const [destinations, cities, stations, categories, seasons] = await Promise.all([
+  getCollection('destinations', (d) => d.data.published),
+  getCollection('cities'),
+  getCollection('stations'),
+  getCollection('categories'),
+  getCollection('seasons'),
+]);
+const cityName = new Map(cities.map((c) => [c.id, c.data.title]));
+const stationName = new Map(stations.map((s) => [s.id, s.data.name]));
+const categoryName = new Map(categories.map((c) => [c.id, c.data.name]));
+
+const currentSeasons = seasonsForDate(new Date(), seasons.map((s) => s.data)).slice(0, 3);
+const featured = destinations.filter((d) => d.data.featured).slice(0, 6);
+const sortedCategories = [...categories].sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Home" path="/">
+  <section class="rounded-2xl bg-rail-700 px-5 py-8 text-white sm:px-8 sm:py-10">
+    <h1 class="text-3xl font-bold leading-tight sm:text-4xl">Wat kun je vandaag met de trein?</h1>
+    <p class="mt-2 max-w-2xl text-rail-100">Geef je vertrekstation, datum en budget op. Railkorting.nl laat zien welke uitjes je met trein en bus kunt bereiken.</p>
+    <div class="mt-6 rounded-xl bg-white p-4 text-slate-900 shadow-lg">
+      <SearchForm />
+    </div>
+  </section>
+
+  {currentSeasons.length > 0 && (
+    <section class="mt-10" aria-labelledby="seizoen-kop">
+      <h2 id="seizoen-kop" class="text-2xl font-bold">Inspiratie voor nu</h2>
+      <ul class="mt-3 grid gap-3 sm:grid-cols-3">
+        {currentSeasons.map((s) => (
+          <li>
+            <a href={withBase(`/seizoenen/${s.id}/`)} class="card block h-full">
+              <h3 class="font-semibold">{s.name}</h3>
+              <p class="mt-1 text-sm text-slate-600">{s.description}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="mt-10" aria-labelledby="cat-kop">
+    <h2 id="cat-kop" class="text-2xl font-bold">Kies een categorie</h2>
+    <ul class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {sortedCategories.map((c) => (
+        <li>
+          <a href={withBase(`/categorieen/${c.id}/`)} class="card flex min-h-20 items-center gap-3">
+            <span aria-hidden="true" class="text-2xl">{c.data.icon}</span>
+            <span class="font-medium">{c.data.name}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="mt-10" aria-labelledby="tips-kop">
+    <div class="flex items-baseline justify-between">
+      <h2 id="tips-kop" class="text-2xl font-bold">Uitgelichte bestemmingen</h2>
+      <a href={withBase('/bestemmingen/')} class="text-sm font-medium text-rail-700 underline">Alle bestemmingen</a>
+    </div>
+    <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {featured.map((d) => (
+        <DestinationCard
+          destination={d}
+          cityName={cityName.get(d.data.city.id) ?? d.data.city.id}
+          stationName={stationName.get(d.data.nearest_station.id) ?? d.data.nearest_station.id}
+          categoryNames={d.data.categories.map((c) => categoryName.get(c.id) ?? c.id)}
+        />
+      ))}
+    </div>
+  </section>
+</Base>

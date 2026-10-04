@@ -1,0 +1,63 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege (SECURITY.md); the deploy job needs Pages + OIDC only.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; do not cancel a running production deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Verify and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build with Astro (pipeline → build → budget/link checks)
+        uses: withastro/action@v6
+        with:
+          node-version: 24
+          package-manager: npm@latest
+          build-cmd: npm run check && npm test && npm run build
+        env:
+          # Project URL defaults; switch to https://railkorting.nl + "/" + INDEXABLE=true once the custom domain is live.
+          SITE_URL: https://thafridge.github.io
+          BASE_PATH: /railkorting.nl
+          INDEXABLE: 'false'
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  smoke:
+    name: Post-deploy smoke test
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch homepage, a destination, sitemap and one reachability file
+        run: |
+          set -euo pipefail
+          BASE="https://thafridge.github.io/railkorting.nl"
+          for p in "/" "/bestemmingen/valkenburg/" "/sitemap-index.xml" "/data/reachability/heerlen.json" "/data/index/stations.json"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L "$BASE$p")
+            echo "$code $BASE$p"
+            test "$code" = "200"
+          done
+          curl -sL "$BASE/data/reachability/heerlen.json" | grep -q '"generated_at"'

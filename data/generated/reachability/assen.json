@@ -1,0 +1,129 @@
+{
+  "generated_at": "2026-10-04T17:03:10.762Z",
+  "source": "estimate-haversine",
+  "schema_version": 1,
+  "station": "assen",
+  "travel_date": "2026-10-10",
+  "items": [
+    {
+      "destination": "groninger-museum",
+      "travel_minutes": 37,
+      "transfers": null,
+      "distance_km": 24.4,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "giethoorn",
+      "travel_minutes": 68,
+      "transfers": null,
+      "distance_km": 37.6,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "dickens-festijn",
+      "travel_minutes": 110,
+      "transfers": null,
+      "distance_km": 86.3,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "rijksmuseum",
+      "travel_minutes": 164,
+      "transfers": null,
+      "distance_km": 131.6,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "hoge-veluwe",
+      "travel_minutes": 165,
+      "transfers": null,
+      "distance_km": 123.2,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "utrecht-centrum",
+      "travel_minutes": 169,
+      "transfers": null,
+      "distance_km": 140.8,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "zandvoort-strand",
+      "travel_minutes": 177,
+      "transfers": null,
+      "distance_km": 153.5,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "naturalis",
+      "travel_minutes": 198,
+      "transfers": null,
+      "distance_km": 168.3,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "binnendieze",
+      "travel_minutes": 199,
+      "transfers": null,
+      "distance_km": 168.7,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "markthal-rotterdam",
+      "travel_minutes": 217,
+      "transfers": null,
+      "distance_km": 185.3,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "keukenhof",
+      "travel_minutes": 218,
+      "transfers": null,
+      "distance_km": 168.3,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "efteling",
+      "travel_minutes": 235,
+      "transfers": null,
+      "distance_km": 188.6,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "valkenburg",
+      "travel_minutes": 272,
+      "transfers": null,
+      "distance_km": 241.6,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "maastricht-centrum",
+      "travel_minutes": 286,
+      "transfers": null,
+      "distance_km": 245.5,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    },
+    {
+      "destination": "thermae-2000",
+      "travel_minutes": 292,
+      "transfers": null,
+      "distance_km": 241.6,
+      "method": "estimate-haversine",
+      "confidence": "low"
+    }
+  ]
+}

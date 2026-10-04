@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DestinationCard from '../../components/DestinationCard.astro';
+import { withBase } from '../../lib/url.ts';
+
+export async function getStaticPaths() {
+  const categories = await getCollection('categories');
+  return categories.map((c) => ({ params: { slug: c.id }, props: { category: c } }));
+}
+const { category } = Astro.props;
+const [destinations, cities, stations, categories] = await Promise.all([
+  getCollection('destinations', (d) => d.data.published && d.data.categories.some((c) => c.id === category.id)),
+  getCollection('cities'),
+  getCollection('stations'),
+  getCollection('categories'),
+]);
+const cityName = new Map(cities.map((c) => [c.id, c.data.title]));
+const stationName = new Map(stations.map((s) => [s.id, s.data.name]));
+const categoryName = new Map(categories.map((c) => [c.id, c.data.name]));
+---
+
+<Base title={category.data.name} description={category.data.description} path={`/categorieen/${category.id}/`}>
+  <nav aria-label="Kruimelpad" class="text-sm text-slate-500"><a href={withBase('/')} class="hover:underline">Home</a> › <a href={withBase('/categorieen/')} class="hover:underline">Categorieën</a> › <span aria-current="page">{category.data.name}</span></nav>
+  <h1 class="mt-4 text-3xl font-bold"><span aria-hidden="true">{category.data.icon}</span> {category.data.name}</h1>
+  <p class="mt-2 text-lg text-slate-700">{category.data.description}</p>
+  {destinations.length === 0 ? (
+    <p class="mt-6 rounded-lg bg-slate-50 p-4 text-slate-600">Nog geen bestemmingen in deze categorie. Deze wordt gevuld in een volgende fase.</p>
+  ) : (
+    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {destinations.map((d) => (
+        <DestinationCard destination={d} cityName={cityName.get(d.data.city.id) ?? ''} stationName={stationName.get(d.data.nearest_station.id) ?? ''} categoryNames={d.data.categories.map((c) => categoryName.get(c.id) ?? c.id)} />
+      ))}
+    </div>
+  )}
+</Base>

@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DestinationCard from '../../components/DestinationCard.astro';
+
+const [destinations, cities, stations, categories] = await Promise.all([
+  getCollection('destinations', (d) => d.data.published),
+  getCollection('cities'),
+  getCollection('stations'),
+  getCollection('categories'),
+]);
+const cityName = new Map(cities.map((c) => [c.id, c.data.title]));
+const stationName = new Map(stations.map((s) => [s.id, s.data.name]));
+const categoryName = new Map(categories.map((c) => [c.id, c.data.name]));
+const sorted = [...destinations].sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.title.localeCompare(b.data.title, 'nl'));
+---
+
+<Base title="Alle bestemmingen" description="Alle treinuitjes in Nederland die met trein en bus bereikbaar zijn." path="/bestemmingen/">
+  <h1 class="text-3xl font-bold">Bestemmingen</h1>
+  <p class="mt-2 text-slate-600">{sorted.length} bestemmingen, allemaal bereikbaar met trein en bus.</p>
+  <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {sorted.map((d) => (
+      <DestinationCard
+        destination={d}
+        cityName={cityName.get(d.data.city.id) ?? d.data.city.id}
+        stationName={stationName.get(d.data.nearest_station.id) ?? d.data.nearest_station.id}
+        categoryNames={d.data.categories.map((c) => categoryName.get(c.id) ?? c.id)}
+      />
+    ))}
+  </div>
+</Base>

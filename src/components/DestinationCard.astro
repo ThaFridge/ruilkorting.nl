@@ -1,0 +1,43 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatMinutes, priceLabel } from '../lib/format.ts';
+import { withBase } from '../lib/url.ts';
+
+interface Props {
+  destination: CollectionEntry<'destinations'>;
+  cityName: string;
+  stationName: string;
+  categoryNames: string[];
+  travelMinutes?: number;
+  estimated?: boolean;
+}
+const { destination, cityName, stationName, categoryNames, travelMinutes, estimated = true } = Astro.props;
+const d = destination.data;
+const price = priceLabel(d.price);
+---
+
+<article class="card flex flex-col gap-2">
+  <div class="flex items-start justify-between gap-3">
+    <h3 class="text-lg font-semibold leading-tight">
+      <a href={withBase(`/bestemmingen/${destination.id}/`)} class="hover:text-rail-700 focus:underline">{d.title}</a>
+    </h3>
+    {d.featured && <span class="chip bg-signal-400/30 text-amber-900">Tip</span>}
+  </div>
+  <p class="text-sm text-slate-600">{cityName} · {d.type}</p>
+  <p class="text-sm text-slate-700">{d.summary}</p>
+  <dl class="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+    {travelMinutes !== undefined && (
+      <>
+        <dt class="text-slate-500">Reistijd</dt>
+        <dd class="font-medium">{estimated ? 'ca. ' : ''}{formatMinutes(travelMinutes)}</dd>
+      </>
+    )}
+    <dt class="text-slate-500">Station</dt>
+    <dd>{stationName}, dan {d.last_mile.minutes} min {d.last_mile.mode === 'walk' ? 'lopen' : d.last_mile.mode}</dd>
+    <dt class="text-slate-500">Prijs</dt>
+    <dd>{price.text}{price.detail && <span class="text-slate-500"> · {price.detail}</span>}</dd>
+  </dl>
+  <ul class="mt-1 flex flex-wrap gap-1">
+    {categoryNames.map((name) => <li class="chip">{name}</li>)}
+  </ul>
+</article>

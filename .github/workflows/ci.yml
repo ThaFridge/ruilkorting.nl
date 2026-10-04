@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, test, build, budgets, links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run check
+      - run: npm test
+      # `build` runs the pipeline first (prebuild) and the size-budget and link checks afterwards (postbuild).
+      - run: npm run build
+      - name: Project structure check
+        run: |
+          test -f README.md
+          test -f docs/ARCHITECTURE.md
+          test -f docs/DATA_MODEL.md
+          test -f docs/decisions/ADR-001-static-site-on-github-pages.md

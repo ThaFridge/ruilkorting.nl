@@ -1,0 +1,37 @@
+{
+  "name": "railkorting.nl",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Railkorting.nl — treinuitjes ontdekken vanaf jouw station. Statische site op GitHub Pages.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "pipeline": "node pipeline/run.ts",
+    "prebuild": "npm run pipeline",
+    "build": "astro build",
+    "postbuild": "node scripts/check-budget.ts && node scripts/check-links.ts",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.5",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.3",
+    "yaml": "^2.9.1"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}

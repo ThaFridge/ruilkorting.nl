@@ -1,0 +1,16 @@
+---
+import { formatDateShort } from '../lib/format.ts';
+
+interface Props {
+  /** ISO date/datetime the figure was computed or retrieved. */
+  at: string;
+  kind: 'reistijd' | 'prijs';
+  estimated?: boolean;
+}
+const { at, kind, estimated = false } = Astro.props;
+const label = kind === 'reistijd' ? `reistijd ${estimated ? 'geschat' : 'berekend'} voor ${formatDateShort(at)}` : `prijs van ${formatDateShort(at)}`;
+---
+
+<span class="chip" title={estimated ? 'Schatting op basis van afstand; nog geen dienstregelingsdata' : undefined}>
+  <span aria-hidden="true">{kind === 'reistijd' ? '🕒' : '💶'}</span>{label}
+</span>
